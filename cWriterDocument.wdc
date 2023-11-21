@@ -1,0 +1,774 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : cWriterDocument
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x10a3bab303b6a409
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  type_code : 10
+  p_codes :
+   -
+     code : |1-
+      cWriterDocument is class
+      	inherits of cLibreOffice
+      	
+      	oISeek		is object OLE dynamic
+      	oMyImage	is object OLE dynamic
+      	oMyText		is object OLE dynamic
+      	oMyCursor	is object OLE dynamic
+      	sSelectText	is string
+      	
+      end
+     type : 131072
+   -
+     code : |1-
+      
+     type : 131074
+  procedures :
+   -
+     name : Constructor
+     procedure_id : 1199007203834962953
+     type_code : 27
+     code : |1-
+      procedure Constructor( )
+      // Call the constructor of the base class
+      Constructor cLibreOffice()
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 1199007203835028489
+     type_code : 28
+     code : |1-
+      procedure Destructor()
+     type : 655360
+   -
+     name : ActiveLibreOfficeObject
+     procedure_id : 1199007203835094025
+     type_code : 12
+     code : |1-
+      // Summary: Has LibreOffice been started with an active document? 
+      // Syntax:
+      // [ <Result> = ] ActiveLibreOfficeObject ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean: True if LibreOffice has been started with an active document
+      
+      function ActiveLibreOfficeObject ( )
+      
+      // Service manager needed for LibreOffice
+      StartService()
+      
+      when exception in	
+      	// Active document
+      	oDocument = oDesktop>>getCurrentComponent()
+      	return True	
+      do
+      	// No document object was found
+      	return False
+      end
+     type : 458752
+   -
+     name : IsOpen
+     procedure_id : 1199007203835159561
+     type_code : 12
+     code : |1-
+      // Summary: Determines if a document is open
+      // Syntax:
+      // [ <Result> = ] IsOpen ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean: Returns True if a document is open, False otherwise
+      
+      function virtual IsOpen ( )
+      
+      when exception in	
+      	//Attempt to access the active sheet of document
+      	if oDocument<>Null then
+      		oDocument>>CurrentController>>ViewCursor()	
+      		return True
+      	else
+      		return False
+      	end
+      do	
+      	delete oDocument
+      	return False
+      end
+     type : 458752
+   -
+     name : MailMerge
+     internal_properties : CAAAAAgAAADwle389rY7nJl6d1JQvCes18KT/6OtQMpRnNdm70F+/A7cGG4hxM/VnM2csTLxQxUn2ECaBKoJRHYvrDYWRJJObSRt8dpETnqDMKpVYWJXvdzed2rF+ayfnnH3DA8tf9riRXcaxOSUY8SlDUUKtSqbPkAvwz5mNba8l4u+nfNZj9iwkTrYoN6f/QQ74VGj0v1hXovv+ahTARFazDnsViLsiIx9Cg==
+     procedure_id : 1199007203835225097
+     type_code : 12
+     code : |1-
+      // Summary: Starts a mail merge
+      // Syntax:
+      //MailMerge (<sFilePath>, <sAnalysisPath>, <sCurrentDocPath>, <s>)
+      //
+      // Parameters:
+      //	sFilePath: Data file (.fic)
+      //	sAnalysisPath: Data analysis (.wdd)
+      //	sCurrentDocPath: <specify the role of sCurrentDocPath>
+      //	s: <specify the role of sSaveAddressPath>
+      // Return value:
+      // 	None
+      
+      
+      procedure MailMerge(sFilePath, sAnalysisPath, sCurrentDocPath, sSaveAddressPath)
+      
+      bRes				is boolean			= False
+      sSep1				is string			= "<"					//Separator #1 used for search
+      sSep2				is string			= ">"					//Separator #2 used for search
+      iItemCnt			are int
+      sBackupFilePath		is string 
+      sVal,sReplaceVal	are strings
+      
+      if sFilePath = "" or sAnalysisPath = "" or sCurrentDocPath = "" or sSaveAddressPath = "" then
+      	Error("The mailshot was canceled.")
+      	return
+      end
+      
+      HOpenAnalysis(sAnalysisPath)
+      
+      //Describe the analysis items
+      sAnalysisDesc is string = HListItem(sFilePath,hLstNormal)
+      
+      //Read the file
+      HReadFirst({sFilePath,indFile})
+      
+      while not HOut({sFilePath,indFile})
+      	
+      	//Create the backup directory
+      	sBackupFilePath=sSaveAddressPath+"\"+{sFilePath+"."+...
+      	ExtractString(sAnalysisDesc,2,CR,FromBeginning),indItem}+Right(ExtractString(sCurrentDocPath,1,"\",FromEnd),4)
+      	
+      	//Copy the model into the backup directory and check its validity
+      	bRes = fCopyFile(sCurrentDocPath,sBackupFilePath)
+      	if bRes=False then
+      		Error("Failure copying the document.")
+      		return	
+      	end
+      	
+      	//Open the copied document and check its validity
+      	if OpenDoc(sBackupFilePath)=False then
+      		Error("Unable to open the document.")
+      		return
+      	end		
+      	
+      	//Reads the items described in the analysis.
+      	//Note: The number of iterations depends on the number of file items 
+      	//and on the number of "fixed strings".
+      	for iItemCnt = 1 _to_ StringCount(sAnalysisDesc,CR)+2
+      		if iItemCnt = StringCount(sAnalysisDesc,CR)+2 then
+      			
+      			//Special Case: The system date (fixed string)
+      			//Replace the string in the entire document		
+      			FindReplace(sSep1+"Date"+sSep2,DateToString(DateSys()))
+      		else
+      			
+      			// General case:
+      			// Define the tag to search in the LibreOffice Writer document
+      			sVal		= sSep1+{sFilePath+"."+ExtractString(sAnalysisDesc,iItemCnt,CR,FromBeginning),indItem}..Caption+sSep2	
+      			// Set the replacement value in the LibreOffice Writer document
+      			sReplaceVal	= {sFilePath+"."+ExtractString(sAnalysisDesc,iItemCnt,CR,FromBeginning),indItem}
+      			// Replace the string in the entire document	
+      			FindReplace(sVal,sReplaceVal)									
+      		end		
+      	end
+      	
+      	//Save the active document
+      	Register()	
+      	
+      	//Close the active document
+      	CloseDocument()	
+      	
+      	//Read the next record
+      	HReadNext({sFilePath,indFile})	
+      end
+     type : 458752
+   -
+     name : CountWords
+     procedure_id : 1199007203835290633
+     type_code : 12
+     code : |1-
+      
+      procedure CountWords( )
+      
+      //Count the number of words found in the active document
+      Info(oDocument>>wordcount())
+     type : 458752
+   -
+     name : MoveToStart
+     procedure_id : 1199007203835356169
+     type_code : 12
+     code : |1-
+      
+      procedure MoveToStart()
+      oMyCursor = oDocument>>CurrentController>>ViewCursor>>gotoStart(False)
+      //Note: 
+      //False = move the cursor,
+      //True = move the cursor and extend the selection
+     type : 458752
+   -
+     name : SetFont
+     procedure_id : 1199007203835421705
+     type_code : 12
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      // SetFont ( [<sFont> [, <nSize> [, <bBold> [, <bItalic> [, <bUnderlined> [, <nFontColor>]]]]]])
+      //
+      // Parameters:
+      // 	sFont: <specify the role of sFont>
+      // 	nSize (default value=-1): < specify the role of nSize >
+      // 	bBold (default value=-1): < specify the role of bBold >
+      // 	bItalic (default value=-1): < specify the role of bItalic >
+      // 	bUnderlined (default value=-1): < specify the role of bUnderlined >
+      // 	nFontColor (default value=-1): < specify the role of nFontColor >
+      // Return value:
+      // 	None
+      
+      procedure SetFont(sFont = "", nSize = -1, bBold= -1, bItalic = -1, bUnderlined= -1, nFontColor = -1)
+      
+      //Retrieve the selected area
+      oMyCursor =oDocument>>CurrentController>>ViewCursor
+      
+      //To change the weight
+      if bBold <> -1  then
+      	// If not yet in bold
+      	if oMyCursor>>CharWeight = 100 then
+      		//Set to bold
+      		oMyCursor>>CharWeight = 150
+      	else
+      		//otherwise, remove bold
+      		oMyCursor>>CharWeight = 100
+      	end	 
+      end
+      
+      if bItalic <> -1 then  //Character: italic	
+      	// //If not yet in italics					
+      	if oMyCursor>>CharPosture = 0 then
+      		oMyCursor>>CharPosture = 1
+      	else
+      		oMyCursor>>CharPosture = 0
+      	end	 
+      end
+      
+      if bUnderlined <> -1  //Underline	
+      	if oMyCursor>>CharUnderline = iUnderlined then
+      		oMyCursor>>CharUnderline = False
+      	else
+      		oMyCursor>>CharUnderline = iUnderlined
+      	end	 
+      end
+      
+      
+      if sFont <> "" then //Font name
+      	oMyCursor>>CharFontName=sFont
+      end
+      
+      if nSize <> -1 then  //Font size
+      	oMyCursor>>CharHeight = nSize
+      end
+      
+      if nFontColor <> -1 then //Font color
+      	
+      	oMyCursor>>CharColor	= RGBToBGR(nFontColor)
+      end
+      
+      
+      delete oMyCursor
+     type : 458752
+   -
+     name : InsertImage
+     internal_properties : CAAAAAgAAABecQM3tDh1/rFaXW6wkPdEO6bPCrm6XKZL5pPE7Rd0OijyQv7FwDdB5hdw99RXHa+Nuu4mJNpJAPR1PFgM2ti8i86nIe6o9rI9MooP/5Dl8zakOAdYHuWWcaiQSU7uIm8TfiT7+61ptsu4ZippFilES2UU5B3HigWv1uBPaDgg4DUtzrs/uePqKCvwwnzYNKOUKd5yIsdixvqPV6z5tc8PYNDTpA==
+     procedure_id : 1199007203835487241
+     type_code : 12
+     code : |1-
+      
+      procedure InsertImage(sImagePath)
+      
+      //Select an image
+      sImagePath				= fImageSelect(fCurrentDir,"","Select an image.","JPEG (*.JPG)"+ TAB +"*.jpg"+ CR +"BMP (*.BMP)"+ TAB +"*.bmp")
+      
+      //Retrieve the area selected by the cursor
+      oMyCursor				= oDocument>>CurrentController>>ViewCursor()
+      
+      //Load the image
+      oMyImage				= oDocument>>createInstance("com.sun.star.text.GraphicObject")
+      oMyImage>>GraphicURL	= "file:///"+Replace(sImagePath,"\","/")
+      
+      //Insert the image at cursor location.
+      oDocument>>Text>>insertTextContent(oMyCursor, oMyImage, True)
+     type : 458752
+   -
+     name : FindReplace
+     procedure_id : 1199007203835552777
+     type_code : 12
+     code : |1-
+      
+      procedure FindReplace(sWords,sReplaceWord)
+      
+      // Create an object named ISeek that will contain all the required parameters for replacement
+      oISeek							= oDocument>>createReplaceDescriptor()
+      
+      // Define the tag to search in the LibreOffice Writer document
+      oISeek>>SearchString			= sWords
+      
+      // Define the replacement value
+      oISeek>>ReplaceString			= sReplaceWord
+      
+      // The search is case-sensitive
+      oISeek>>SearchCaseSensitive		= True
+      
+      // Only search for words
+      oISeek>>SearchWords				= False
+      
+      // Backward Search
+      oISeek>>SearchBackwards			= False
+      
+      // Perform a search with the method of regular expressions
+      oISeek>>SearchRegularExpression	= False
+      
+      // Search for the paragraphs with a style given by SearchString
+      oISeek>>SearchStyles			= False
+      
+      // Search for a text similar to the sought text
+      oISeek>>SearchSimilarity		= False
+      
+      // Replace all the tags 
+      oDocument>>replaceAll(oISeek)
+     type : 458752
+   -
+     name : InsertText
+     procedure_id : 1199007203835618313
+     type_code : 12
+     code : |1-
+      
+      procedure InsertText(sText)
+      oMyCursor = oDocument>>CurrentController>>ViewCursor>>Start
+      oDocument>>Text>>insertString(oMyCursor,sText,False)
+     type : 458752
+   -
+     name : MoveToRight
+     procedure_id : 1199007203835683849
+     type_code : 12
+     code : |1-
+      
+      procedure MoveToRight(iNbR)
+      oMyCursor	= oDocument>>CurrentController>>ViewCursor>>Start
+      oMyText		= oDocument>>Text>>createTextCursorByRange(oMyCursor)
+      oDocument>>CurrentController>>ViewCursor>>goRight(iNbR,False)
+     type : 458752
+   -
+     name : MoveToLeft
+     procedure_id : 1199007203835749385
+     type_code : 12
+     code : |1-
+      
+      procedure MoveToLeft(iNbL)
+      oMyCursor	= oDocument>>CurrentController>>ViewCursor>>Start
+      oMyText		= oDocument>>Text>>createTextCursorByRange(oMyCursor)
+      oDocument>>CurrentController>>ViewCursor>>goLeft(iNbL,False)
+     type : 458752
+   -
+     name : MoveToEnd
+     procedure_id : 1199007203835814921
+     type_code : 12
+     code : |1-
+      
+      procedure MoveToEnd()
+      //Define the write cursor:
+      oMyCursor = oDocument>>CurrentController>>ViewCursor>>gotoEnd(False)
+     type : 458752
+   -
+     name : Copy
+     procedure_id : 1199007203835880457
+     type_code : 12
+     code : |1-
+      
+      procedure Copy(bToClipboard is boolean = False)
+      oMyCursor	= oDocument>>CurrentController>>ViewCursor
+      oMyText		= oDocument>>Text>>createTextCursorByRange(oMyCursor)
+      
+      // Save the selection
+      sSelectText	= oMyText>>string
+      
+      if bToClipboard = True then
+      	ToClipboard(sSelectText)	
+      end
+     type : 458752
+   -
+     name : Cut
+     procedure_id : 1199007203835945993
+     type_code : 12
+     code : |1-
+      
+      procedure Cut()
+      
+      oMyCursor		= oDocument>>CurrentController>>ViewCursor
+      oMyText			= oDocument>>Text>>createTextCursorByRange(oMyCursor)
+      
+      // Save the selection
+      sSelectText		= oMyText>>string
+      
+      // Erase
+      oMyText>>string	= ""
+     type : 458752
+   -
+     name : Paste
+     procedure_id : 1199007203836011529
+     type_code : 12
+     code : |1-
+      
+      procedure Paste(sTextContent is string = "")
+      oMyCursor	= oDocument>>CurrentController>>ViewCursor
+      oMyText		= oDocument>>Text>>createTextCursorByRange(oMyCursor)
+      
+      if sTextContent~="" then
+      	oDocument>>Text>>insertString(oMyText , sSelectText, True)	
+      else
+      	oDocument>>Text>>insertString(oMyText ,sTextContent, True)
+      end
+      
+      
+      //The third argument means: 
+      //False = insert in the text 
+      //True = overwrite in the text
+     type : 458752
+   -
+     name : NextWord
+     procedure_id : 1199007203836077065
+     type_code : 12
+     code : |1-
+      procedure NextWord()
+      
+      oMyCursor = oDocument>>CurrentController>>ViewCursor>>gotoStart(False)
+      
+      //move at the beginning of the next word
+      oMyCursor>>gotoNextWord(False)
+     type : 458752
+   -
+     name : PreviousWord
+     procedure_id : 1199007203836142601
+     type_code : 12
+     code : |1-
+      
+      procedure PreviousWord()
+      
+      oMyCursor = oDocument>>CurrentController>>ViewCursor>>gotoStart(False)
+      
+      //move at the beginning of the previous word
+      oMyCursor>>gotoPreviousWord(False)
+     type : 458752
+   -
+     name : Select
+     internal_properties : CAAAAAgAAAD4yny25Xx7nsiTTObyJK5TgmgXIMmD8QLjoB69EV2I1Hpt44b4Fzfx2d0f9veOXAbTvKLZ/Z4RBcRAMxRjkGgi0ZH3sd4TeJcfbn8zX/JOYFAAr1Fa6es7psdoSbrlxkCPk+t/xf5334xjxMyJh2urFTZ7CPcAjuQK82i5+uPcYHZP5vAOAewGOKnV6b3KY1flqWhl3Q==
+     procedure_id : 1199007203836208137
+     type_code : 12
+     code : |1-
+      procedure Select(iNb)
+      
+      //Retrieve the current position of the cursor
+      oMyCursor =oDocument>>CurrentController>>ViewCursor
+      
+      //Select some characters located to the right of the cursor
+      oMyCursor>>goRight(iNb,True)
+      
+      //Retrieve the text selected by the cursor
+      oMyText		= oDocument>>Text>>createTextCursorByRange(oMyCursor)
+      sSelectText	= oMyText>>string
+      
+      //Test and display the result
+      if sSelectText="" then
+      	Error(StringBuild("An empty string was returned by the ''Select'' command: ",...
+      	"- some controls may have caused trouble with the selection,",...
+      	"- because no character is found ot the right of the cursor on a length of %1.",iNb))
+      else
+      	Info(sSelectText)	
+      end
+     type : 458752
+   -
+     name : SelectAll
+     internal_properties : CAAAAAgAAADy1AK43o5cHgSr2ILmUIqfjgA/dEWDxaJvEMqBTaEUWGZNy1ocN4MRvd37unOayJrn9FqloZaFFfgIZ8h37Jw+vUFPnTJ7DK9bLp3VPdCgogIqSdu4lx3p2EmGa4hzcGpZZS3hK1RBLcbdWnZHhT3tx1h1MuW2OApUXX6j4Fme+pBhMPo052aUSmtzA4tIsCjnq2pj0w==
+     procedure_id : 1199007203836273673
+     type_code : 12
+     code : |1-
+      procedure SelectAll(bDisplayText is boolean = True)
+      
+      //Retrieve the current position of the cursor
+      oMyCursor =oDocument>>CurrentController>>ViewCursor
+      
+      //Position the cursor at the start of the document
+      oMyCursor>>gotoStart(False)
+      
+      //Move the cursor to the end of the document
+      oMyCursor>>gotoEnd(True)
+      
+      //Retrieve the text selected by the cursor
+      oMyText		= oDocument>>Text>>createTextCursorByRange(oMyCursor)
+      sSelectText	= oMyText>>string
+      
+      //Test and display the result
+      if sSelectText="" then
+      	Error("An empty string was returned by the ''Select All'' command: ",...			
+      	"- some controls may have caused trouble with the selection,",...
+      	"- the relevant document is actually empty.")
+      else
+      	if bDisplayText = True then
+      		Info(sSelectText)	
+      	end
+      end
+     type : 458752
+   -
+     name : PrintDoc
+     internal_properties : CAAAAAgAAACcQYe4BrwnPq9mXLJzbouBPY2r7UfSDXJj7SPp9k3HhLcm3XTS6CtVtKdmLChiW3HFeBcDOUDsY3GfZXK7BA0EkUqqh9KcziSLkM/H9df1XmGw3Evdpvpp9sJu6bXi19Wuz07XAvcKhfD8EB6WXjZ8AMSeDp6L/6RU0vR1IyzxVOZY0KU412L/r1NUiKt8x9vpoEBI0YN563iGFIMVHgL2C1Pf
+     procedure_id : 1199007203836339209
+     type_code : 12
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //Print ( [<nNbCopies> [, <sPageList> is string]])
+      //
+      // Parameters:
+      //	nNbCopies (default value=1): <specify the role of nNbCopies>
+      //	sPageList (string): <specify the role of nPageNumber>
+      // Return value:
+      // 	None
+      //// Example:
+      // Indicate an example.
+      //
+      procedure PrintDoc(nNbCopies=1,sPageList is string = "")
+      
+      // Configure the print
+      PrintSettings is array of 1 object Automation dynamic
+      
+      // Number of copies for the document
+      PrintSettings[1]		= oServiceManager>>Bridge_GetStruct("com.sun.star.beans.PropertyValue")
+      PrintSettings[1]>>Name	= "CopyCount"
+      PrintSettings[1]>>Value	= nNbCopies
+      
+      // Printed pages
+      if sPageList<>"" then
+      	ArrayAdd(PrintSettings)
+      	PrintSettings[2]		=  oServiceManager>>Bridge_GetStruct("com.sun.star.beans.PropertyValue")
+      	PrintSettings[2]>>Name	= "Pages"
+      	PrintSettings[2]>>Value	= sPageList
+      end
+      
+      // Effective printout
+      oDocument>>print(PrintSettings)
+     type : 458752
+   -
+     name : SpellingChecker
+     internal_properties : CAAAAAgAAAC8jkhqKshK+FrN9mR82uCdhHpN6kOF9MICGKrJEwWtzsyxLcpCBcfv+5k/yGU62LIpZNTd23AFk3ac74rdgMhKZ9n18WSRaL1pcnI6WLe7QbPl/Nx/jgbmxZZ/eJN6c1mGiDDmZnf+dt+W75uinFyYYPtIO3yz6kTwecKPicI2vtS1hDrwJxbA/j+jM+8wSHSx/TQpGQ==
+     procedure_id : 1199007203836404745
+     type_code : 12
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //SpellingChecker ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //// Example:
+      // Indicate an example.
+      //// Automatic process of exceptions:   run CASE EXCEPTION:
+      //
+      
+      procedure SpellingChecker()
+      
+      // Local variables
+      tArguments			is array dynamic of variant
+      dispatcher			is object OLE dynamic
+      DisplayedDocument	is object OLE dynamic
+      
+      // Retrieve the dispatcher
+      dispatcher			= oServiceManager>>createInstance("com.sun.star.frame.DispatchHelper")
+      
+      // Retrieve the displayed document
+      DisplayedDocument	= oDocument>>CurrentController>>Frame 
+      
+      // Send the command for displaying the spelling checker
+      dispatcher>>executeDispatch(DisplayedDocument,".uno:SpellingAndGrammarDialog", "",0,tArguments)
+      
+      case exception:
+      return
+     type : 458752
+   -
+     name : ExportPDF
+     internal_properties : CAAAAAgAAABwscQL/aF+iLAk/OziS0NN+KlCIUSUhNx+/gda2zTLWpT5tux39QgPmS8MbeqcLRdmA1T7FWfVBTMwa78fS7LdcCbWrAOpxgvaCFAi8PdpbWvEhPkCz6zS4dyTaxsXYAWVmXQYLZ9bRIDzID4joPHQ+MzKtk2zzjX6Z9hRivI0xUJuIIEvEQrHZ8zgQTDIgXQliLtH49KqkczTg2OUCqLAA6W7MBskJ7h6lcVND2KNwRq2/9VZdQ+4Rzr2sn+ynnsuIQGCCap3kL+SoCs=
+     procedure_id : 1199007203836470281
+     type_code : 12
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] ExportPDF ([<sNamePDFFile> is string])
+      //
+      // Parameters:
+      //	sNamePDFFile (string): <specify the role of sNamePDFFiile>
+      // Return value:
+      // 	boolean: // 	None
+      //// Example:
+      // Indicate an example.
+      //
+      procedure ExportPDF(sPDFFileName is string = "")
+      
+      arrArguments		is array of 2 object Automation dynamic
+      dispatcher			is object OLE dynamic
+      DisplayedDocument	is object OLE dynamic
+      sPDFDocName			is string
+      
+      // Is there an active document
+      if IsOpen()=False then
+      	Error("No LibreOffice Writer document is open.","The PDF export is not possible.")
+      	return False
+      end
+      
+      // Was a file name specified?
+      if sPDFFileName = "" then
+      	sPDFFileName = fSelect(fCurrentDir, "", "Export as...", "PDF File (*.pdf)"+TAB+"*.pdf", "*.pdf", fselCreate)
+      	
+      	// Was a file selected?
+      	if sPDFFileName = "" then
+      		// Abandon the export
+      		return False
+      	end
+      end
+      
+      // Retrieve the dispatcher
+      dispatcher				= 	:oServiceManager>>createInstance("com.sun.star.frame.DispatchHelper")
+      
+      // Retrieve the displayed document
+      DisplayedDocument		= :oDocument>>CurrentController>>Frame
+      
+      // Format the path of the file
+      sPDFDocName				= "file:///"+Replace(sPDFFileName,"\","/")
+      
+      // Export to PDF
+      arrArguments [1]		= :oServiceManager>>Bridge_GetStruct("com.sun.star.beans.PropertyValue")
+      arrArguments [1]>>Name	= "URL" 
+      arrArguments [1]>>Value	= sPDFDocName
+      arrArguments[2]			= :oServiceManager>>Bridge_GetStruct("com.sun.star.beans.PropertyValue") 
+      arrArguments[2]>>Name	= "FilterName" 
+      arrArguments[2]>>Value	= "writer_pdf_Export" 
+      
+      // Send the export command
+      dispatcher>>executeDispatch(DisplayedDocument,".uno:ExportDirectToPDF", "",0,arrArguments )
+      
+      // The export is performed properly be default
+      return True
+     type : 458752
+   -
+     name : SaveAs
+     internal_properties : CAAAAAgAAADc84GjGicxIsdQ8dh+mpl2FfztvSny6JbLDvOsaYeYtjB6pqZdoJMZzidAf7gHGbuNSsIWNBqd0EylvFAw4mxwU55jmda4EkKNEnq/O2B5v97c+ulGaB9Yp5oiy8SY3KVRZCbt8TfrwOFqyLS/6IMCiVvGfkvhvHd90OpBpvLaDsOb8E3NO2VkRgXCPDIydgEV6lO7yeifzW0yDPUMupdn1k5RJg==
+     procedure_id : 1199007203836535817
+     type_code : 12
+     code : |1-
+      
+      procedure SaveAs(sFullPath is string = "")
+      
+      arrNoArgs						is array dynamic of variant
+      sNameDocument1,sNameDocument2	are strings
+      
+      // Is there an active document
+      if IsOpen()=False then
+      	Error("No LibreOffice Writer document is open.","Unable to save.")
+      	sNameDocument1=""
+      	
+      else
+      	
+      	if sFullPath<>"" then
+      		sNameDocument1 = sFullPath
+      	else
+      		sNameDocument1 = fSelect(fCurrentDir, "", "Save as...", "ODF Text (*.odt)"+TAB+"*.odt" + RC + "Word 2007-365 (*.docx)"+TAB+"*.docx" , "*.odt", fselCreate)
+      		 
+      	end
+      	
+      	if sNameDocument1<>"" then
+      		
+      		// Format the path of the file
+      		sNameDocument2 = "file:///"+Replace(sNameDocument1,"\","/")
+      		
+      		// Save the document
+      		oDocument>>storeAsURL(sNameDocument2, arrNoArgs)
+      	end	
+      end
+      
+      return sNameDocument1
+     type : 458752
+   -
+     name : NewDocument
+     internal_properties : CAAAAAgAAAA4Cjz2jaRpngQr2ILm0IqfjgC/dMUDRaLvEEoBzaGU2ObNy9ocN4ORvV37unMayJrn9NqlIRYFFXgI50j37By+PcFPHTJ7DC9brt0VfZBgYkJqCZv4V12pmAnGq8gzMCqZpe2haxSB7YadmraHRf2tB5g18iV2eMoUHb7jIBleutCh8Lp0p6ZUCiuzQ8sIY/8laailnQ==
+     procedure_id : 1199007203836601353
+     type_code : 12
+     code : |1-
+      // Back:
+      // boolean
+      function NewDocument( )
+      
+      arrNoArgs is array dynamic of variant
+      
+      // Service manager needed for LibreOffice
+      StartService()
+      
+      // Create a new LibreOffice Writer document
+      oDocument = oDesktop>>LoadComponentFromURL("private:factory/swriter", "_blank", 0, arrNoArgs)
+      
+      return True
+     type : 458752
+   -
+     name : OpenDoc
+     internal_properties : CAAAAAgAAAAqfDrgrH59YBLHAKhw4FpfIFD1SAN9DcQ1tKrfvzG82CQJ/SJShV9vGwkXqF3SYEJJJAydU9hFW+6EP0K9EEjSv8HFyRTRMN3Jcn4+rLsHnU+BOOhDIpJy6Wr7/HdeT0WiNGwiyss6IoOqWx8mwHi0DCe0B8CxTSeJMlusxyRVzSUEO/Nj1kf145TMSCbnFhYvc6K7iw==
+     procedure_id : 1199007203836666889
+     type_code : 12
+     code : |1-
+      // In/Out:
+      // 	- psFullPath: 
+      // Back:
+      // boolean
+      function OpenDoc( sFullPath )
+      
+      arrNoArgs		is array dynamic of variant
+      sFormattedPath	is string
+      
+      // Service manager needed for LibreOffice
+      StartService()
+      
+      if fFileExist(sFullPath) then
+      	
+      	// Format the path of the file
+      	sFormattedPath	= "file:///"+Replace(sFullPath,"\","/")
+      	
+      	// Open file in LibreOffice Writer
+      	oDocument		= oDesktop>>LoadComponentFromURL(sFormattedPath, "_blank", 0, arrNoArgs)
+      	
+      	if oDocument<>Null then
+      		return True
+      	end
+      end
+      
+      return False
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : CDocument
+resources :
+ string_res :
+  identifier : 0x1fd224f900333592
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

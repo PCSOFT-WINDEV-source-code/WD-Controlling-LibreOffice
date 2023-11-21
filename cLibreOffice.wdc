@@ -1,0 +1,183 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : cLibreOffice
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x1f731071007a8555
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  type_code : 10
+  p_codes :
+   -
+     code : |1-
+      cLibreOffice is class
+      	oServiceManager	is object OLE dynamic
+      	oDesktop		is object OLE dynamic
+      	oDocument		is object OLE dynamic	
+      end
+     type : 131072
+   -
+     code : |1-
+      
+     type : 131074
+  procedures :
+   -
+     name : Constructor
+     procedure_id : 2266173115022935381
+     type_code : 27
+     code : |1-
+      procedure Constructor( )
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 2266173115023000917
+     type_code : 28
+     code : |1-
+      procedure Destructor()
+      
+      CloseDocument ( )
+     type : 655360
+   -
+     name : Register
+     internal_properties : CAAAAAgAAACq/LpgPgYT0BJHAKhwYFpfIFB1SIP9jcS1tCpfPzE8WKSJ/aJShV/vG4kXqF1SYEJJJIyd01jFW26Ev8I9EMhSP0HFSRTRMF3J8j7+bPtH3Q9BeCgDYlKyKaq7vDeej4Vi9Kxiigv6YsPqG9/mALj0zOf0R4DxDWfJchtsh2SVDeXEezMjFgc1I9SMCOY3QIiv8yI7Cw==
+     procedure_id : 2266173115023131989
+     type_code : 12
+     code : |1+
+      // Summary: Saves the active document
+      // Syntax:
+      // Record ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      
+      procedure Register ( )
+      
+      // Is there an active document?
+      if IsOpen() = False then
+      	Error("No document is opened.","Unable to save.")
+      	return
+      end
+      
+      
+      
+      // Save
+      when exception in
+      	// Save
+      	oDocument>>Store()
+      do
+      	Error("Unable to use this feature in this case","Try 'Save as...'")
+      	return
+      end
+     type : 458752
+   -
+     name : Modified
+     procedure_id : 2266173115023197525
+     type_code : 12
+     code : |1+
+      // Summary: Indicates whether the document was modified
+      // Syntax:
+      // [<Result> = ] Modified ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // Boolean: True if the document was modified
+      
+      function Modified( )
+      
+      if :oDocument<>Null then
+      	return :oDocument>>isModified
+      else
+      	return False
+      end
+     type : 458752
+   -
+     name : CloseDocument
+     procedure_id : 2266173115023263061
+     type_code : 12
+     code : |1-
+      // Summary: Closes the active document
+      // Syntax:
+      // CloseDocument ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      
+      procedure CloseDocument( )
+      
+      if oDocument<>Null then
+      	when exception in		
+      		oDocument>>close(True)		
+      	do
+      		// Document probably closed
+      	end
+      end
+     type : 458752
+   -
+     name : StartService
+     internal_properties : CAAAAAgAAABFv35QYaZgIDG/C4M9QKX/NziiZMLyTh5FoFvz7o9EXrwUgwD/vW70Cj7eKdGlmc9WxfAD5+ShF7xiYcstg6XQNS4sjsB8l0j0fUBSM3QFT/eIjXqoVYGxEO0RIva1qqq9mvta/eJHgJcJLRlJuV2l+yNT+aGI8gnNu4fEqlM4O+uHrQxfcgLf+GQdOl5dhBa9JFz4+e0vgSrIxtr4M1ec5e9n9zaqyGM/1JwZrnsftk2atg==
+     procedure_id : 2266173115023328597
+     type_code : 12
+     code : |1-
+      // Summary: Starts LibreOffice
+      // Syntax:
+      // StartService ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      
+      procedure StartService ( )
+      
+      HourGlass(True)
+      
+      when exception in
+      	// Create a LibreOffice service if necessary
+      	oServiceManager	= new object OLE ("com.sun.star.ServiceManager")
+      	oDesktop		= oServiceManager>>createInstance("com.sun.star.frame.Desktop")
+      	
+      do
+      	EndProgram("LibreOffice is not installed on your machine.", "This example requires LibreOffice to work.")
+      end
+      
+      HourGlass(False)
+     type : 458752
+   -
+     name : IsOpen
+     procedure_id : 2266948210607800879
+     type_code : 12
+     code : |1+
+      // Summary: Determines if a document is open
+      // Syntax:
+      // [ <Result> = ] IsOpen ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean: Returns True if a document is open, False otherwise
+      
+      function virtual IsOpen ( )
+      
+      return True
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COpenOffice
+resources :
+ string_res :
+  identifier : 0x1fd224f9009b35b1
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

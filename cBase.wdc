@@ -1,0 +1,407 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : cBase
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x18fee68000086853
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  internal_properties : CAAAAAgAAAB866eP4Ets4TTLMsshqEz3fUrTsqRNJyKDnG3Fh2I4G2j/gv1+ctrBQKEsIohDsPZ15m8aTDv/o82gJIt8op0fGoBvBA==
+  type_code : 10
+  p_codes :
+   -
+     code : |1+
+      
+      //
+      // Class used to access an ODB LibreOffice database
+      //
+      cBase is class
+      private
+      	// OLE objects to access the database
+      	_oServiceManager	is object OLE dynamic
+      	_oDBContext			is object OLE dynamic
+      	_oDB				is object OLE dynamic	
+      	_oBase				is object OLE dynamic
+      	_oStatement			is object OLE dynamic
+      	
+      	// Array containing the results of the last query
+      	_arrResult			is array dynamic of 0 by 0 strings
+      	_nCurrentIndex		is int
+      	_nMaximumIndex		is int
+      end
+      
+     type : 131072
+  procedures :
+   -
+     name : Constructor
+     procedure_id : 1801130338425595987
+     type_code : 27
+     code : |1-
+      procedure Constructor()
+      
+      // Initialize the members
+      :_nCurrentIndex = 0
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 1801130338425661523
+     type_code : 28
+     code : |1-
+      procedure Destructor()
+      
+      // Close the OLE objects
+      if :_oStatement <> Null then :_oStatement>>Close()
+      if :_oBase <> Null      then :_oBase>>Close()
+      if :_oBase <> Null      then :_oBase>>Dispose()
+     type : 655360
+   -
+     name : OpenDatabase
+     internal_properties : CAAAAAgAAAAer1KfLOQVgveoIYD62v2aBdxafRW/VqzZFM3Cq9XmDFYkxCwr5+uqrJ1SD/IgeeEv6GQ6/MIdZAYPNM7ivLbizfQZiQKU+moj4OrVveKjidze2Uw7cz45NKMZ3gVnmfCYMymkii7mNZqnVz9IPyShPIb57eSyqjF5iHotA92AQG2V4vszDUMKyH9EugjkHcrqXMlhSx7Nux/oWqveSICO/zqTZA==
+     procedure_id : 1801131244663841220
+     type_code : 12
+     code : |1-
+      // Summary: Opens a LibreOffice database
+      // Syntax:
+      //[<Result> = ] OpenDatabase (<sPath> is string [, <sUsername> [, <sPassword>]])//
+      // Parameters:
+      //	sPath (string): Path of the BDD file
+      //	sUsername: Database user name
+      //	sPassword: Password
+      // Return value:
+      // 	boolean: 
+      //
+      procedure OpenDatabase(sPath is string,sUsername="",sPassword="")
+      
+      // Format path for LibreOffice
+      sPath	= Replace(sPath, "\", "/")
+      sPath	= "file:///" + sPath
+      
+      // Initialization
+      :_oServiceManager = new object OLE ("com.sun.star.ServiceManager")
+      :_oDBContext      = :_oServiceManager>>createInstance("com.sun.star.sdb.DatabaseContext")
+      :_oDB             = :_oDBContext>>getByName(sPath)
+      :_oBase           = :_oDB>>getConnection(sUsername,sPassword)
+      :_oStatement      = :_oBase>>createStatement()
+      
+      return True
+      
+      case exception:
+      return False
+     type : 458752
+   -
+     name : SQLExecute
+     internal_properties : CAAAAAgAAABYA3VRhWOK0aCLH7ZuEG9qWoypHWU2mfWlA/6GyLLFYRnX9bDeNjKBQo05DIirCKt8XVG75zGTP5MbeOVWXpxv1nCWVim200XurUPOfCjDsGNYQPN6ZCgR/sAmMxNhExFBLBD8uSFTS7vTReQXmzzpTZj8aXbTd9Z3y0HXH/1Sb0rI
+     procedure_id : 1801133636960658085
+     type_code : 12
+     code : |1-
+      // Summary: Runs the SQL query passed as parameter
+      // Syntax:
+      //[ <Result> = ] SQLExecute (<sSQL> is string)
+      //
+      // Parameters:
+      //	sSQL (string): SQL query to run
+      // Return value:
+      // 	boolean: 
+      
+      procedure SQLExecute(sSQL is string)
+      
+      // Variables
+      oQuery		is object OLE dynamic
+      nNbItem		is int
+      nIndex		is int
+      sItem		is string
+      aaResult	is array of 0 strings
+      
+      // Run the query
+      oQuery = :_oStatement>>ExecuteQuery(sSQL)
+      
+      // If it is a SELECT query, retrieve the number of affected items and create the list of results
+      if sSQL [= "SELECT" then
+      	// Initialization
+      	sItem	= ExtractString(sSQL,1,"FROM")
+      	nNbItem	= StringCount(sItem,",") + 1
+      	ArrayDeleteAll(_arrResult)
+      	Dimension(_arrResult,0,nNbItem)
+      	:_nCurrentIndex = 0
+      	
+      	// As long as results are found
+      	while oQuery>>Next()
+      		// Fill the temporary array
+      		for I=1 _to_ nNbItem
+      			ArrayAdd(aaResult,oQuery>>getString(I))
+      		end
+      		
+      		// Add an empty row
+      		nIndex = ArrayAddLine(_arrResult)
+      		
+      		// Fill the empty row
+      		for I=1 _to_ aaResult.Count
+      			:_arrResult[nIndex][I] = aaResult[I]
+      		end
+      		
+      		// Delete the temporary array
+      		ArrayDeleteAll(aaResult)
+      	end
+      	
+      	// Maximum index to access the array
+      	:_nMaximumIndex = nIndex
+      end
+      
+      // Freeing
+      oQuery>>Close()
+      
+      return True
+      
+      case exception:
+      return False
+     type : 458752
+   -
+     name : SQLRead
+     internal_properties : CAAAAAgAAABYA3VRhWOK0aCLH7ZuEG9qWoypHWU2mfWlA/6GyLLFYRnX9bDeNjKBQo05DIirCKt8XVG75zGTP5MbeOVWXpxv1nCWVim200XurUPOfCjDsGNYQPN6ZCgR/sAmMxNhExFBLBD8uSFTS7vTReQXmzzpTZj8aXbTd9Z3y0HXH/1Sb0rI
+     procedure_id : 1801146358654129116
+     type_code : 12
+     code : |1-
+      // Summary: Reads the value of the current row for the column index passed as parameter
+      // Syntax:
+      //[ <Result> = ] SQLRead (<nColumnIndex> is int)
+      //
+      // Parameters:
+      //	nColumnIndex (integer): Index of the requested column
+      // Return value:
+      // 	string: Column value
+      //
+      procedure SQLRead(nColumnIndex is int)
+      
+      return :_arrResult[:_nCurrentIndex][nColumnIndex]
+      
+      case exception:
+      return ""
+     type : 458752
+   -
+     name : SQLNext
+     internal_properties : CAAAAAgAAADKl2TBcweZmojx/Lu5R2600rjZCZd7Rhf3sM3y05QA1LImJ+/VmIFE0ntq7qIcdSfob4XkbsMgOJsIWvWUcDfKk8IchX+kjIbvsSXFUFi+zMSG/mX1gfIw9YaI9pZ28PgHOHlS3hnry2CEM8fs3QyMJusydCL7oQIuW0yG0qtWXk+hJdVYON3LJu40G4lqY1UYQBk2l0Z/Rqa87xqNxxojB2FDGmErS9ehAh9yCot6uHDp4muRbU6X907mo2mj+XVsasQstbOL2uH3auxEX7ztnCJAEa000Mi1h7QhkA3EnLd/2WvY7N//ZhYBTu5ohs59NvdRTItQY+ZndGOiK+XCFxVMTYx6s1HVVfoWghdpmv4tgX6IXgkYezi8RWOZ0Z+O
+     procedure_id : 1801153372335783010
+     type_code : 12
+     code : |1+
+      // Summary: Positions on the next record
+      // Syntax:
+      //[ <Result> = ] SQLNext ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean: True if the record read OK, False otherwise
+      
+      procedure SQLNext()
+      
+      // Increment the current index
+      :_nCurrentIndex++
+      
+      // The browse is possible if the end of the array has not been reached yet
+      if :_nCurrentIndex <= :_nMaximumIndex then
+      	return True
+      else
+      	return False
+      end
+     type : 458752
+   -
+     name : SQLReadRec
+     procedure_id : 1801156430352554652
+     type_code : 12
+     code : |1+
+      // Summary: Returns the value of a row for a row index and a column index passed as parameter
+      // Syntax:
+      //[ <Result> = ] SQLReadRec (<nRowIndex> is int, <nColumnIndex> is int)
+      //
+      // Parameters:
+      //	nRowIndex (integer): index of the row
+      //	nColumnIndex (integer): index of the column
+      // Return value:
+      // 	string: Value of the record
+      
+      procedure SQLReadRec(nRowIndex is int, nColumnIndex is int)
+      
+      return :_arrResult[nRowIndex,nColumnIndex]
+      
+     type : 458752
+   -
+     name : SQLDeleteRec
+     internal_properties : CAAAAAgAAABYA3VRhWOK0aCLH7ZuEG9qWoypHWU2mfWlA/6GyLLFYRnX9bDeNjKBQo05DIirCKt8XVG75zGTP5MbeOVWXpxv1nCWVim200XurUPOfCjDsGNYQPN6ZCgR/sAmMxNhExFBLBD8uSFTS7vTReQXmzzpTZj8aXbTd9Z3y0HXH/1Sb0rI
+     procedure_id : 1801158599311216858
+     type_code : 12
+     code : |1-
+      // Summary: Deletes the records from a table according to the criteria passed in parameter
+      // Syntax:
+      //[ <Result> = ] SQLDeleteRec (<sTableName> is string, <sItemName> is string, <Value>)
+      //
+      // Parameters:
+      //	sTableName (string): Name of the affected table
+      //	sItemName (string): Name of the condition item
+      //	Value: Condition value
+      // Return value:
+      // 	boolean:  
+      
+      procedure SQLDeleteRec(sTableName is string, sItemName is string,Value)
+      
+      // Variable
+      oQuery		is object OLE dynamic
+      strSQL		is string
+      
+      // Initialization
+      strSQL	= StringBuild("DELETE FROM ""%1"" WHERE ""%2""=%3",sTableName,sItemName,Value)
+      
+      // Deletes the records if sItemName contains the Value value
+      oQuery	= :_oStatement>>ExecuteQuery(strSQL) 
+      
+      // Freeing
+      oQuery>>Close()
+      
+      return True
+      
+      case exception:
+      return False
+     type : 458752
+   -
+     name : SQLAddRec
+     internal_properties : CAAAAAgAAABAYqROGDQxnrgVNrqWKvAN7h7njpkbdEQ07L7T0Qldpo6F+1KsJ6uh/b3jmruyoKpXxJLlWc7FXUCgZ0CnrGw21Zk/lVKrNN/LTlHBKTyEdkZ+3b/Uc3G9JKWqtzSflP7d6aE198BFMZIJLkIDIdGBexxZxhFAbcuLNGneMh8bpw9m/flpyLVjBdbW7oRR5mKd4RDNZQ==
+     procedure_id : 1801159784722990358
+     type_code : 12
+     code : |1-
+      // Summary: Add a record to the database
+      // Syntax:
+      //[ <Result> = ] SQLAddRec (<sTableName> is string [, ...])
+      //
+      // Parameters:
+      //	sTableName (string): Name of the affected table
+      // Return value:
+      // 	boolean:  
+      //// Example:
+      // gclBase:SQLAddRec("Book","Title",EDT_Title,"Publisher",EDT_Publisher,"ISBN",EDT_ISBN)
+      //
+      procedure SQLAddRec(sTableName is string,*)
+      
+      // Variable
+      sSQL		is string
+      sItem		is string
+      sValue		is string
+      oQuery		is object OLE dynamic
+      
+      // Initialization
+      sSQL = "INSERT INTO ""%1"" (%2) VALUES(%3)"
+      
+      // Generate the query
+      for I=2 _to_ (MyParameters..NbReceived) STEP 2
+      	sItem += StringBuild("""%1"","	,MyParameters[I])
+      	sValue += StringBuild("'%1',"	,MyParameters[I+1])
+      end
+      
+      // Delete the unnecessary comma
+      sItem	= sItem[[1 to Length(sItem)-1]]
+      sValue	= sValue[[1 to Length(sValue)-1]]
+      
+      // Create the query
+      sSQL	= StringBuild(sSQL,sTableName,sItem,sValue)
+      
+      // Execution
+      oQuery	= :_oStatement>>ExecuteQuery(sSQL)
+      
+      // Freeing
+      oQuery>>Close()
+      
+      return True
+      
+      case exception:
+      return False
+     type : 458752
+   -
+     name : SQLModifyRec
+     internal_properties : CAAAAAgAAADc7ijKimjqqNot1kR8moD9BPqtigOltGJCuAopU4UNbgzxjWqCJUdPu/mfKKU6uFLppHS921DFM3b8T2rdQGgqpxkVUeQxaN3pEiIqqGcLMeOVzEzvfnZWdaZvaOMqAwn2eMAWFufuZs/mH8vyTOzIEKuYaywjWjQgCbK/2bKGbkSllGqgV0bwLs8TI/8QaNQRXZRJ+Q==
+     procedure_id : 1821179593699082812
+     type_code : 12
+     code : |1-
+      // Summary: Modifies a record
+      // Syntax:
+      //[ <Result> = ] SQLModifyRec (<sTableName> is string, <sConditionColumn>, <nConditionValue> [, ...])
+      //
+      // Parameters:
+      //	sTableName (string): Name of the table
+      //	sConditionColumn: Column for modification condition
+      //	nConditionValue: Value of the condition
+      // Return value:
+      // 	boolean:   
+      
+      procedure SQLModifyRec(sTableName is string, nConditionColumn, nConditionValue, *)
+      
+      // Variables
+      sSQL		is string
+      sValue		is string
+      oQuery		is object OLE dynamic
+      sTemp		is string
+      
+      // Initialization
+      sSQL = "UPDATE ""%1"" SET %2 WHERE ""%3""='%4'"
+      
+      // Generate the query
+      for I = 4 _to_ (MyParameters..NbReceived) STEP 2
+      	// Double the quotes if some are found in the value to insert
+      	sTemp		= Replace(MyParameters[I+1],"'","''")
+      	sTemp		= Replace(sTemp,"""","""""")
+      	sValue += StringBuild("""%1""='%2',", MyParameters[I], sTemp)
+      end
+      
+      // Delete the unnecessary comma
+      sValue	= sValue[[1 to Length(sValue)-1]]
+      
+      // Build the query
+      sSQL	= StringBuild(sSQL,sTableName, sValue, nConditionColumn, nConditionValue)
+      
+      // Execution
+      oQuery	= :_oStatement>>ExecuteQuery(sSQL)
+      
+      // Freeing
+      oQuery>>Close()
+      
+      return True
+      
+      case exception:
+      return False
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : CClasse1
+resources :
+ string_res :
+  identifier : 0x18fee67400053b77
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+  strings :
+   -
+     text :
+      en-GB : Unable to run %1 query.
+     index : 0
+   -
+     text :
+      en-GB : Unable to open the %1 file
+     index : 1
+   -
+     text :
+      en-GB : Unable to delete records.
+     index : 2
+   -
+     text :
+      en-GB : Make sure LibreOffice (or OpenOffice) is installed
+     index : 3
+   -
+     text :
+      en-GB : Unable to add data.
+     index : 4
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ
+associated_test :
+ name : TEST_cBase.wxt

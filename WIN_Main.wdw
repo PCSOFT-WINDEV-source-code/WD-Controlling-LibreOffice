@@ -1,0 +1,117 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : WIN_Main
+ major_version : 28
+ minor_version : 0
+ type : 2
+ description : ""
+ subtype : 0
+window :
+ name : WIN_Main
+ identifier : 0x20a3bab0460e965d
+ internal_properties : CAAAAAgAAADeqcVfRtxcFS58swTEjjBF/PeStnBhpJ2fEk13uti/oiH0V+m6PLFHu4KsTO3dYCD8Z4aoZErSFQv8/EIF/JGOpuTe1PW+NbMNNs2Ua8+nfWmh1RmzK2QbeY6kO3oD8SDtm1MJMru0E0QuEHZsD2m0t+upi92Kejp+GzaRq+92XNRoU69AZlBaAHVXuOvor8dt2E1NRftC4VTKo/ABsTTwcfTvJAq9uvPrj70EH3vio7cSQC8ZRijm/ZkEQj4ZdjBoR8fNRW8n8bQLFifZ/AwHttWQlhKnWapwlt8wY2LSeSNv8ZLw2BTiRrpVCerzKDn1GE3oSYZUBrQr5/HcQ+u5tvv7M2+SOLktUFvaMSU4ZhkJOrpMY5P68avE10jC5NIj/JR12rtOh5yNHEMK1IjWOAvoUpfiIYuIRDlmK2ScU4Gcq+0CAgvcUyPIJm3+7tH16PkY53Ug/J3sANYM5LcewsPKilKeerWueFFc1V1v23y8WaQktkWJxrZqLTIFVK9yirGwbKq8+BpAVPVSds9rn7+GpgfBhC8ve7gO8ez2p6rhzojBE+MSy5N/aMRaUFzGXTQc6LF/mokY8bl86FWquuj7FvffO15TLSizjq99LBb0qwrrWgYZQ7xt6u5lptHPECj6x5JQiHb6R0BBtyiK5fs+XIG+AjD9w+WtTFJuhClhfh+BLGVhcmP/f83LIQ==
+ properties :
+  width : 291
+  height : 310
+  widthClient : 289
+  heightClient : 278
+ controls :
+  -
+    name : BTN_Writer_document
+    identifier : 0x20a3bab0460f965d
+    internal_properties : CAAAAAgAAADJelUqeltDFmNC98zjPwxqdG+D5Bx0KQoXaXunnIR1I0OfMHryEMkhZ91/JSkUSTE4YaCORRWEd+bdHsYuoB77bpRXEy2fmNXmAVFQyjd3CqU9m4JV4+qGXEhgvnrgmIwQIGQZjbZerxIFlOnFE9QtM6r/M65AETpHDgAy1PvjjG0eEBPSiMWZn8vipefNr5FLMGgPQ5+cRzrj/kpQ/9YsBr4HNOHG18LMSKIbAr3g3N4mpjwE86HZGoXG+db5cbTZBsrQpkaStGK2OUao+cJ6sqA51Frg0/vPUYgzdom9tB/A32N3iVWoXYT7RCUP0wG9g/EyT/VjULnjleA6SXLzF9wZU02YvuWw5J0AaB7F5JvrnjeIQE8I8s1l6hax3NHrGCvxxA35a+F67d1jWk9llAlYUBgZc6i0oBCICp8NM0XfTG66apA1Jh2OQf5MNONsVPBkN0XA2kVyztUUBCNJzhXgRctqtzJamWgKpnSM1gASirgoWvyVMAEBpaAEcNREb7X90jRnNeH5abjCV1oy04hneRHSuga9rMALd02Bu0+q53P5WdLE4Pemj5L3Faj5trNDQBJuKhqWEMekmDqm9SYt+HaR3AK7trjPYg8iBNDrxO6t/BNe+5r04Co36UdUI6uxwoVPNRdXOae4D+rNkOaicbxaWrzM20TdBLowHxsvROR+//DI2yUJKFKDuuHLYnrBzE6p4DRxU7sQkNpcvy0QQKP3ITm8xAOFbhVhAWTY/azkl4sbAyp2nY0K+UaGlyIakNTl6G13o6FafQ==
+    properties :
+     x : 52
+     y : 46
+     width : 185
+     height : 58
+    type : 4
+    code_elements :
+     type_code : 4
+     p_codes :
+      -
+        code : |1+
+         Open(WIN_LibreOffice_Writer)
+        type : 18
+      -
+        type : 161
+        enabled : false
+  -
+    name : BTN_Calc_workbook
+    identifier : 0x20a3bab04610965d
+    internal_properties : CAAAAAgAAAAdGAie06Iso3RzaLvEdKNtw7R11dqTXZG1iBQI/dT5HjrHbWiJ1NH9z1RVumL1Gqw0GZuMvj8x7VkvHTpOZpZKVLWgLqIb+CKEK4/92hJyrWqaef7LkiZCTlb/pN8ix5SsY7hZMAkSnTFFFzSCBQK5wLaXwRNAKnYC47nCNqmCag7ylDHkGEB/CN/fruRS83RZ3PcpPxRp+4kfQDJHkOapex2y8eLcqZ/mvd0p5A+8cAxWP5R4aM4qliI3LEvlcsAtN6Oie/eZC+kYJmb8tA3MoHTzCtaikLM7QzZSPN+A0d/P8yVWtQvV6zAH9iOtemrivYzq9+I622IBEshEDkk57NX8eFnleIf6/HruY31azXnID3j9kIkm/o4xaGm81SE8AxTu6Rotn6eWR4Oqln3Cbhop/pAPB72BTfORo+1+IufiRT40G/VL40dyd2NsAcMPKZ2LbDOw7BugNBmJKR99pGhCNQMCyW8/jWzAKw3veeNaXkcsaMlJ+PVPxWxZW4AewwwQ7Z2TiXeV2LioYXk2DO/cKUpdT1obCggnft25VMfKVNlX64CVilfUzveFnpIzxSFzjM5Ishm0vRSOzngKX79ZhtdNvngkpWk/H0aPRYpaU5JRscRNtOczeoioLqR1+hMwAr6y58arDTq9n7cSoxndDN8epYJKwtUHIMzVK2voGSevSQZwkDwxPZdIRdd2CIrEK0nyxM6pTr1uGURDxAeIYps7OR6Y5ojpueQYnZ5AfntXgrBIWHIkXBSTzBNsppy/kME256HHI43X0epB1mp2TgtO3uijzGeD+n+YrR/AFEF701+uv1c=
+    properties :
+     x : 52
+     y : 110
+     width : 185
+     height : 58
+    type : 4
+    code_elements :
+     type_code : 4
+     p_codes :
+      -
+        code : |1+
+         Open(WIN_LibreOffice_Calc)
+        type : 18
+      -
+        type : 161
+        enabled : false
+  -
+    name : BTN_Base_database
+    identifier : 0x20a3bab04611965d
+    internal_properties : CAAAAAgAAAC5znhQRbo/BAG2P1Kp9RkYC2VGDZRz+bHxBMsniSDUHGMHN95BaWvWtZwBYGwGg3rFdhNRxNsqWlXzFO+EeIHzMNal+Ras0sRDKH4xKlkFZjlK6lp5ODkMkxwiHj3swTlvvtMPKJ6zrePXqUHNrqpotI3jzJYOQsI55PNZg63u15SdGkVtNZ8DXcdZrGNvxeo+IEkqvT+gVy4Gm6cAoHiF8AA+fjnn1TelK15nBnkSmsWfs4GUTg1sVzWQgy7fDma2GnR12XW2pyxVVvJLId5CPDKpjizXJCIwSyUVWGuF0rHDtUfkX8g1zOKBKHb3tyw4iMBeP+PlRh2MS5IJJI6ojhrYRjhChp6iWJf31qXmB1zka+/mIr+faf4KD+JPg/ZaBWAnxZtWokHtxJvIRDeTpSNlj0QOOMJomxbPW4oANrNjM3AUhirLiHflZo69CyAZAz5lYkq2XL5FZIPW9nTIpjQ4KScabgXBnSRfp5XmvaVA8mKBQj3hpEFr6KaL8IALxYuIXTJ+zEX0LYHUHFLo5qKgY5nXKUPvMHlhAGcrRcp6w9jEAUi9AUxu0cjGHhQQwuJLq5k9KXdSlF5ec3x2Edvr3IqH963854nGQ2WZ8VaNRE3NxqjTvSmvCQ3wVgUzELYkano4SeJN7GWhOZ8hVYMehQHI25+xSiNTIP6mldnrEzjNz9ywwd9+T31AMDYxi/GPtGHi9ycH3OmHepvFdeRlBDQY1akXxcdMniKzS9OF7ecjzdURM6KjPxXSWMTJDs209itStF/dBV4=
+    properties :
+     x : 52
+     y : 174
+     width : 185
+     height : 58
+    type : 4
+    code_elements :
+     type_code : 4
+     p_codes :
+      -
+        code : |1+
+         Open(WIN_LibreOffice_Base)
+        type : 18
+      -
+        type : 161
+        enabled : false
+ menu :
+  name : _Menu
+  identifier : 0x292573e513b5f221
+  internal_properties : CAAAAAgAAACCv199ARoPUfG3WAPSG9eefhOOjWMQrs8CrX6cGGGJPoSHWBq4PXhStOWc1YnAZMZ5+EFR1WTDn8CTOTiyLnXPpAR5X8rsRkPZrm1yZeYDDt4kRzDPLbUf4Sh/mD3kd1D8V2drCFLmjeQhgpw7GKGwHRga+ZdjSqXGIC3LD1RracZ230hOmUJTj+ABDW4IHrw4PflmVGgp8E9KnAf/gselRrzEY90l3Cr9N00QijFYYrbrl4qF4kdim1YX6jYT4ezQhbJsU84ENZsxzq+o0JVHYQ8rxck600VhGV04/ao=
+  options : []
+ languages :
+  - en-GB
+ popup_menus : []
+ message_bar :
+  internal_properties : CAAAAAgAAAAjFWXItEk/EPvcbGR+hALkgRfdOpVtIn+yZNxHnmSRFJegE/AnD2HbGAaMfhGCqfzkryHG9FVhjtF+iQYkZ59QBQ88Okhh0vjCoVhOagox2hvIqrJnU30QK15/ZA==
+ actionbar : {}
+ code_elements :
+  type_code : 1
+  p_codes :
+   -
+     code : |1+
+      procedure MyWindow()
+   -
+     type : 180
+     enabled : false
+   -
+     type : 230
+     enabled : false
+   -
+     code : |1-
+      
+     type : 40
+ code_parameters :
+  internal_properties : CAAAAAgAAAAspXRQsX4kpYpRJzI8SMGEUfXYJhQeqig0H9mPZLI9hoPnkeFEnSQ8t7JVd8VUY9eLyST/2DyAYB+9rK7lbHVOclfSdkhgAQ9dNjlmStKMpPl9
+  original_name : Modele1
+resources :
+ string_res :
+  identifier : 0x1fd224f900ad35ef
+  internal_properties : CAAAAAgAAACyXVFaObH4lOGSEHJoZf1MD49w+XTw2LScZCP/urkWFwy+HYJdyQ3umA==
+custom_note :
+ internal_properties : CAAAAAgAAAC68/W0/adbG0nFCRhrE42B5HRnbDzVHaz86sSQyxlBk7I=
+rad :
+ internal_properties : CAAAAAgAAABoAN7PLpwJW3EiA7WVZdCA5EwrCA1rvutcDHooMWKe

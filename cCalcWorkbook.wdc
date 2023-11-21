@@ -1,0 +1,899 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : cCalcWorkbook
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x10a3bab2037b9f85
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  internal_properties : CAAAAAgAAAActnuucflEUAtouMNOF3MQVjcx/PQk77LNNt6MJo+XI381gKqqs5rPtlfDbvme6c8VUTZbzeINCOC+soq/9DA7BW5QWN9aL5iO/4wY45V9HyWKrD6i0ofW6J+vuw3NYVi7PW4SY4NPEvO/UdTgumRV9QE=
+  type_code : 10
+  p_codes :
+   -
+     code : |1+
+      
+      cCalcWorkbook is class
+      	object cLibreOffice	// CCalcWorkbook has the same characteristics as the base class (cLibreOffice)
+      	
+      	oWorksheet	is object OLE dynamic
+      	oCellRange	is object OLE dynamic
+      	
+      end
+     type : 131072
+  procedures :
+   -
+     name : Constructor
+     procedure_id : 1199007199536127877
+     type_code : 27
+     code : |1-
+      procedure Constructor()
+      
+      // Call the constructor of the base class
+      Constructor cLibreOffice()
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 1199007199536193413
+     type_code : 28
+     code : |1+
+      procedure Destructor()
+      
+     type : 655360
+   -
+     name : WorkbookCreate
+     internal_properties : CAAAAAgAAAAYKtwWrcS9jsQLQGKeeIL/HoBH5C2LhQonKNoJ7SEEUK6VqyKcN6sRnQ1TOttC8OrHpBKlGS4VnZAAp/AXzAxm9WnvZWK7tI8LvqlJsSScHv42tYfMm4llnN1if5wnDCaVobl9jyidmQpBBopL6YlJs1QxzglqhNZ4ocpnpI3qdnxdPPZIi/IgHm+/x19sg59FCciFvQ==
+     procedure_id : 1199007199536258949
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorkbookCreate ()
+      // Create a new workbook
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean: True if the workbook was created
+      
+      procedure WorkbookCreate()
+      
+      arrNoArgs is array dynamic of variant
+      
+      // Service manager needed for LibreOffice
+      :StartService()
+      
+      // Create a new workbook
+      :oDocument = :oDesktop>>LoadComponentFromURL("private:factory/scalc", "_blank", 0, arrNoArgs)
+      
+      // Retrieve the active worksheet
+      :oWorksheet = :oDocument>>CurrentController>>ActiveSheet
+      
+      // The A1 cell is selected by default
+      :CellsSelect("A1")
+      
+      return True
+     type : 458752
+   -
+     name : WorkbookOpen
+     internal_properties : CAAAAAgAAAAuQfMF7OT5nsGKLcaUYAvgk4bzc5myNJJRPAc+M3liOG68ZI6xNJtlJI1EAY4pt+HPiERaHGJ9BIbPFC6ifNYiLdR5qSK0GspjIMo1fWIDSbw+CTwrw47JJDNJjtW36aAoIxlUun42RQq3B28YjzRRzHYp3RTYtziC2UXA+9UbLX6G40zu2hBZa851S8dtr/h6J8AciKlMMDBRqR633wVBMCCjVA==
+     procedure_id : 1199007199536324485
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorkbookOpen (<sFullPath> is string)
+      // Opens an existing workbook
+      // Parameters:
+      //	sFullPath (ANSI string): Full path of the workbook (.sxc, .xls, etc.) to open
+      // Return value:
+      // 	boolean: True if the workbook was opened
+      
+      procedure WorkbookOpen(sFullPath is string)
+      
+      arrNoArgs		is array dynamic of variant
+      sFormattedPath	is string
+      
+      // Service manager needed for LibreOffice
+      :StartService()
+      
+      if fFileExist(sFullPath) then
+      	// Format the path of the file
+      	sFormattedPath = "file:///"+Replace(sFullPath,"\","/")
+      	
+      	// Open file in LibreOffice
+      	:oDocument = :oDesktop>>LoadComponentFromURL(sFormattedPath, "_blank", 0, arrNoArgs)
+      	
+      	if :oDocument<>Null then
+      		// Active worksheet
+      		:oWorksheet = :oDocument>>CurrentController>>ActiveSheet
+      		// Selected cells
+      		:oCellRange = :oDocument>>CurrentSelection
+      		return True
+      	end
+      end
+      
+      return False
+     type : 458752
+   -
+     name : WorksheetSelect
+     procedure_id : 1199007199536390021
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorksheetSelect (<sWorksheetName> is string)
+      // Select a worksheet by its name
+      // Parameters:
+      //	sWorksheetName (ANSI string): Name of the worksheet to select
+      // Return value:
+      // 	boolean: True if the worksheet was selected
+      
+      procedure WorksheetSelect(sWorksheeetName is string)
+      
+      // if the worksheet exists
+      if sWorksheeetName<>"" _and_ :WorksheetExist(sWorksheeetName) then
+      	// Select the specified worksheet
+      	:oWorksheet = :oDocument>>Sheets>>getByName(sWorksheeetName)
+      	// Display
+      	:oDocument>>CurrentController>>ActiveSheet = :oWorksheet
+      	return True
+      	
+      else
+      	return False
+      end
+     type : 458752
+   -
+     name : CellWrite
+     internal_properties : CAAAAAgAAACd58aB6paMdCFPLX77Z/XN3QM4hld0Etv0ElizlzQsWksqw3c2icZkXg629RXR8VNCFWTrI3DJHzASmbcBJ0XkydZIZgwQH4BAFbAOx9htA5vYMVLMMZkhbPsj3KifQEQ3GGXk59Q1boWvp4PzQzuHNbHtk6uyGL+7oeFuZPWOjU0df+bh/JBNzhJPtNCXB0KHpomz2CWqEJJgcVq2/VqNwjFpiarjlxPLzjjbXmlOXpVijg==
+     procedure_id : 1199007199536455557
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] CellWrite (<sCell> is string, <sValue>)
+      // Write the specified content in the specified cell
+      // Parameters:
+      //	sCell (ANSI string): Cell to write in
+      //	sValue: Value to write: numeric, string or formula
+      // Return value:
+      // 	boolean: True if the value was written in the cell
+      
+      procedure CellWrite(sCell is string, sValue)
+      
+      // No action if it's not the address of a cell
+      if MatchRegularExpression(sCell, "[a-zA-Z]+[0-9]+")=False then
+      	return False
+      end
+      
+      if IsNumeric(sValue) then
+      	// Write the specified value into the specified cell
+      	:oWorksheet>>getCellRangeByName(sCell)>>Value = sValue
+      else
+      	if Left(sValue,1)="=" then
+      		// Write the specified formula into the specified cell
+      		:oWorksheet>>getCellRangeByName(sCell)>>Formula = sValue+" "
+      		:oDocument>>calculateAll()
+      	else
+      		// Write the specified text into the specified cell
+      		:oWorksheet>>getCellRangeByName(sCell)>>String = sValue
+      	end
+      end
+      
+      return True
+     type : 458752
+   -
+     name : CellRead
+     procedure_id : 1199007199536521093
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] CellRead (<sCell> is string)
+      // Interrogates the content of a cell
+      // Parameters:
+      //	sCell (ANSI string): Cell to read
+      // Return value:
+      // 	Undefined type: Value read
+      
+      procedure CellRead(sCell is string)
+      
+      // No action if it's not the address of a cell
+      if MatchRegularExpression(sCell, "[a-zA-Z]+[0-9]+")=False then
+      	return ""
+      end
+      
+      // According to the type of cell
+      switch :CellType(sCell)
+      	case 1	// VALUE
+      		return :oWorksheet>>getCellRangeByName(sCell)>>Value
+      	case 2	// TEXT
+      		return :oWorksheet>>getCellRangeByName(sCell)>>String
+      	case 3	// FORMULA
+      		return :oWorksheet>>getCellRangeByName(sCell)>>FormulaLocal
+      	other case
+      		return ""
+      end
+     type : 458752
+   -
+     name : CellsFont
+     procedure_id : 1199007199536586629
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //CellsFont ( [<sFont> [, <nSize> [, <bBold> [, <bUnderline> [, <nTextColor> [, <nBackgroundColor>]]]]]])
+      // Modify the font of the cells found in the selected range
+      // Parameters:
+      //	sFont (default value=""): Font to apply
+      //	nSize (default value=-1): Font size to apply
+      //	bBold (default value=-1): Bold
+      //	bUnderline (default value=-1): Underlined
+      //	nTextColor (default value=-1): Color of the text
+      //	nBackgroundColor (default value=-1): Background color
+      // Return value:
+      // 	None
+      
+      procedure CellsFont(sFont="", nSize=-1, bBold=-1, bUnderline=-1, nTextColor=-1, nBackgroundColor=-1)
+      
+      // Font
+      if sFont<>"" then
+      	:oCellRange>>CharFontName = sFont
+      end
+      
+      // Size
+      if nSize<>-1 then
+      	:oCellRange>>CharHeight = Max(Val(nSize),2)
+      end
+      
+      // Bold
+      if bBold<>-1 then
+      	if bBold then
+      		:oCellRange>>CharWeight = 150
+      	else
+      		:oCellRange>>CharWeight = 0
+      	end
+      end
+      
+      // Underlined
+      if bUnderline<>-1 then
+      	if bUnderline then
+      		:oCellRange>>CharUnderline = 1
+      	else
+      		:oCellRange>>CharUnderline = 0
+      	end
+      end
+      
+      // Text color
+      if nTextColor<>-1 then
+      	:oCellRange>>CharColor = RGBToBGR(nTextColor)
+      end
+      
+      // Background color
+      if nBackgroundColor<>-1 then	
+      	:oCellRange>>CellBackColor = RGBToBGR(nBackgroundColor)	
+      end
+     type : 458752
+   -
+     name : CellsVerticalAlignment
+     procedure_id : 1199007199536652165
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] CellsVerticalAlignment (<nAlignment> is int)
+      // Specifies the vertical alignment for the selected cells
+      // Parameters:
+      //	nAlignment (integer): 1->top, 2->center, 3->bottom
+      // Return value:
+      // 	boolean: True if the alignment was applied
+      
+      procedure CellsVerticalAlignment(nAlignment is int)
+      
+      if nAlignment in (1,2,3) then
+      	// Specifies the vertical alignment of the cells found in the selected range
+      	:oCellRange>>VertJustify = nAlignment
+      	return True
+      end
+      
+      return False
+     type : 458752
+   -
+     name : CellsHorizontalAlignment
+     procedure_id : 1199007199536717701
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] CellsHorizontalAlignment (<nAlignment> is int)
+      // Specifies the horizontal alignment for the selected cells
+      // Parameters:
+      //	nAlignment (integer): 1->left, 2->center, 3->right
+      // Return value:
+      // 	boolean: True if the alignment was applied
+      
+      procedure CellsHorizontalAlignment(nAlignment is int)
+      
+      if nAlignment in (1,2,3) then
+      	// Specifies the horizontal alignment of the cells found in the selected range
+      	:oCellRange>>HoriJustify = nAlignment
+      	return True
+      end
+      
+      return False
+     type : 458752
+   -
+     name : ColumnWidth
+     procedure_id : 1199007199536783237
+     type_code : 12
+     code : |1+
+      // Syntax:
+      //ColumnWidth (<sColumn> is string [, <nWidth> is int])
+      // Modify the width of the specified column
+      // Parameters:
+      //	sColumn (ANSI string): Index of the column to be resized
+      //	nWidth (integer - default value=-1): New width in 1/100 mm (no value specified = optimal width applied)
+      // Return value:
+      // 	None
+      
+      procedure ColumnWidth(sColumn is string, nWidth is int = -1)
+      
+      nCol is int = Max(Val(sColumn),1)
+      
+      // Width of the specified column
+      if nWidth=-1 then
+      	:oWorksheet>>getColumns>>getByIndex(nCol-1)>>OptimalWidth = True
+      else
+      	nWidth = Max(0,nWidth)
+      	:oWorksheet>>getColumns>>getByIndex(nCol-1)>>Width = nWidth
+      end
+      
+     type : 458752
+   -
+     name : RowHeight
+     procedure_id : 1199007199536848773
+     type_code : 12
+     code : |1+
+      // Syntax:
+      //RowHeight (<pnRow> [, <nHeight> is int])
+      // Modify the height of the specified row
+      // Parameters:
+      //	pnRow: Index of the row to be resized
+      //	nHeight (integer - default value=-1): New height in 1/100 mm (no value specified = optimal height applied)
+      // Return value:
+      // 	None
+      
+      procedure RowHeight(pnRow, nHeight is int = -1)
+      
+      nRow is int = Max(pnRow,1)
+      
+      // Width of the specified column
+      if nHeight = -1 then
+      	:oWorksheet>>getRows>>getByIndex(nRow-1)>>OptimalHeight = True
+      else
+      	nHeight = Max(0,nHeight)
+      	:oWorksheet>>getRows>>getByIndex(nRow-1)>>Height = nHeight
+      end
+     type : 458752
+   -
+     name : CellsSelect
+     procedure_id : 1199007199536914309
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] CellsSelect (<sTopLeftCell> is string [, <sBottomRightCell> is string])
+      //
+      // Parameters:
+      //	sTopLeftCell (ANSI string): Top left cell in the range of cells to select (e.g., B2)
+      //	sBottomRightCell (ANSI string - default value=""): Bottom right cell in the range of cells to select (e.g., F6) [optional]
+      // Return value:
+      // 	boolean: 
+      
+      procedure CellsSelect(sTopLeftCell is string, sBottomRightCell is string = "")
+      
+      // No action if it's not the address of a cell
+      if MatchRegularExpression(sTopLeftCell, "[a-zA-Z]+[0-9]+")=False then
+      	return False
+      end
+      
+      // No action if it's not the address of a cell
+      if sBottomRightCell<>"" _and_ MatchRegularExpression(sBottomRightCell, "[a-zA-Z]+[0-9]+")=False then
+      	return False
+      end
+      
+      // Build the range of cells (B2:F6 for instance)
+      sCellRange is string
+      sCellRange = sTopLeftCell+":"
+      if sBottomRightCell=""then
+      	sCellRange += sTopLeftCell
+      else
+      	sCellRange += sBottomRightCell
+      end
+      
+      // Select the range of cells
+      :oCellRange = :oWorksheet>>getCellRangeByName(sCellRange)
+      
+      // Display
+      :oDocument>>CurrentController>>Select(:oCellRange)
+      
+      return True
+     type : 458752
+   -
+     name : WorksheetAdd
+     procedure_id : 1199007199536979845
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorksheetAdd (<sWorksheetName> is string [, <nIndex> is int])
+      // Add a worksheet to a workbook
+      // Parameters:
+      //	sWorksheetName (ANSI string): Name of the worksheet
+      //	nIndex (integer - default value=0): Position of the worksheet in relation to the existing worksheets
+      // Return value:
+      // 	boolean: 
+      
+      procedure WorksheetAdd(sWorksheeetName is string, nIndex is int = 0)
+      
+      nSub is int = Max(nIndex,0)
+      
+      // if no index is specified, the addition is performed after the last worksheet
+      if nSub=0 then
+      	nSub=:WorksheetOccurrence()
+      end
+      
+      // if the worksheet does not already exist
+      if :WorksheetExist(sWorksheeetName)=False _and_ sWorksheeetName<>"" then
+      	// Add the worksheet
+      	:oDocument>>Sheets>>insertNewByName(sWorksheeetName, nSub-1)
+      	return True
+      else
+      	return False
+      end
+     type : 458752
+   -
+     name : WorksheetDelete
+     procedure_id : 1199007199537045381
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorksheetDelete (<sWorksheetName> is string)
+      // Delete a worksheet
+      // Parameters:
+      //	sWorksheetName (ANSI string): Name of the worksheet to delete
+      // Return value:
+      // 	boolean: 
+      
+      procedure WorksheetDelete(sWorksheeetName is string)
+      
+      // if the worksheet exists
+      if sWorksheeetName<>"" _and_ :WorksheetExist(sWorksheeetName) then
+      	// A workbook must contain at least one worksheet	
+      	if :WorksheetOccurrence()>1 then
+      		// Delete worksheet
+      		:oDocument>>Sheets>>removeByName(sWorksheeetName)
+      		// Active worksheet
+      		:oWorksheet = :oDocument>>CurrentController>>ActiveSheet
+      		return True
+      	end
+      end
+      
+      return False
+     type : 458752
+   -
+     name : WorksheetRename
+     procedure_id : 1199007199537110917
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorksheetRename (<sWorksheetName> is string, <sNewName> is string])
+      // Renames a worksheet
+      // Parameters:
+      //	sWorksheetName (ANSI string): Name of the worksheet to modify
+      //	sNewName (ANSI string): New name of the worksheet
+      // Return value:
+      // 	boolean: True if the worksheet was renamed
+      
+      procedure WorksheetRename(sWorksheeetName is string, sNewName is string)
+      
+      // empty names are not allowed for worksheets
+      if sWorksheeetName="" _or_ sNewName="" then
+      	return False
+      end
+      
+      // if the worksheet to modify is found
+      // and if the new name is not already used
+      if :WorksheetExist(sWorksheeetName)=True _and_ :WorksheetExist(sNewName)=False then
+      	// Rename the worksheet
+      	:oDocument>>Sheets>>getByName(sWorksheeetName)>>Name = sNewName
+      	return True
+      else
+      	return False
+      end
+     type : 458752
+   -
+     name : WorksheetExist
+     procedure_id : 1199007199537176453
+     type_code : 12
+     code : |1+
+      // Syntax:
+      //[ <Result> = ] WorksheetExist (<sWorksheetName> is string)
+      // Checks the existence of a worksheet
+      // Parameters:
+      //	sWorksheetName (ANSI string): Name of the worksheet
+      // Return value:
+      // 	Undefined type: True if the worksheet exists
+      
+      procedure WorksheetExist(sWorksheeetName is string)
+      
+      if sWorksheeetName<>"" then
+      	return :oDocument>>Sheets>>hasByName(sWorksheeetName)
+      else
+      	return False	
+      end
+     type : 458752
+   -
+     name : CellType
+     procedure_id : 1199007199537241989
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] CellType (<sCell> is string)
+      // Returns the type of a cell (empty, value, text, formula)
+      // Parameters:
+      //	sCell (ANSI string): Cell to read
+      // Return value:
+      // 	Undefined type: one of the following values:
+      // 0: EMPTY
+      // 1: VALUE
+      procedure CellType(sCell is string)
+      
+      // No action if it's not the address of a cell
+      if MatchRegularExpression(sCell, "[a-zA-Z]+[0-9]+")=False then
+      	return ""
+      end
+      
+      return :oWorksheet>>getCellRangeByName(sCell)>>Type
+     type : 458752
+   -
+     name : ColumnAdd
+     procedure_id : 1199007199537307525
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] ColumnAdd (<sPosition> is string [, <nNumberColumn> is int])
+      // Add a column at a specified location
+      // Parameters:
+      //	sPosition (ANSI string): Index of the column to add
+      //	nNumberColumn (integer - default value=1): Number of columns to add
+      // Return value:
+      // 	boolean: true if the addition was successful, false otherwise
+      
+      procedure ColumnAdd(sPosition is string, nNumberColumn is int = 1)
+      
+      nPosition	is int	= sPosition
+      nNbColumns	is int	= Max(Val(nNumberColumn), 1)
+      
+      if nPosition >= 0 then
+      	when exception in
+      		:oWorksheet>>getCellByPosition(nPosition-1, 1)>>Columns>>insertByIndex(0, nNbColumns)
+      		return True
+      	do
+      		// the insertion may fail if merged cells are found
+      	end
+      end
+      
+      return False
+     type : 458752
+   -
+     name : RowAdd
+     procedure_id : 1199007199537373061
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] RowAdd (<sPosition> is string [, <nNumberRow> is int])
+      // Add a row at a specified location
+      // Parameters:
+      //	sPosition (ANSI string): Index of the row to add
+      //	nNumberRow (integer - default value=1): Number of rows to add
+      // Return value:
+      // 	boolean: 
+      
+      procedure RowAdd(sPosition is string, nNumberRow is int = 1)
+      
+      nPosition	is int	= sPosition
+      nNbRows		is int	= Max(Val(nNumberRow), 1)
+      
+      if nPosition>=0 then
+      	when exception in
+      		:oWorksheet>>getCellByPosition(1, nPosition-1)>>Rows>>insertByIndex(0, nNbRows)
+      		return True
+      	do
+      		// the insertion may fail if merged cells are found
+      	end
+      end
+      
+      return False
+     type : 458752
+   -
+     name : ColumnDelete
+     procedure_id : 1199007199537438597
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //ColumnDelete (<sPosition> is string [, <nNumberColumn> is int])
+      // Deletes the specified column
+      // Parameters:
+      //	sPosition (ANSI string): Index of the first column to delete
+      //	nNumberColumn (integer - default value=1): Number of columns to delete
+      // Return value:
+      // 	None
+      
+      procedure ColumnDelete(sPosition is string, nNumberColumn is int = 1)
+      
+      nPosition	is int	= sPosition
+      nNbColumns	is int	= Max(nNumberColumn,1)
+      
+      if nPosition >= 0 then
+      	:oWorksheet>>getCellByPosition(nPosition-1, 1)>>Columns>>removeByIndex(0, nNbColumns)
+      end
+     type : 458752
+   -
+     name : RowDelete
+     procedure_id : 1199007199537504133
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //RowDelete (<sPosition> is string [, <nNumberRow> is int])
+      // Deletes the specified row
+      // Parameters:
+      //	sPosition (ANSI string): Index of the first row to delete
+      //	nNumberRow (integer - default value=1): Number of rows to delete
+      // Return value:
+      // 	None
+      
+      procedure RowDelete(sPosition is string, nNumberRow is int = 1)
+      
+      nPosition	is int	= sPosition
+      nNbRows		is int	= Max(nNumberRow,1)
+      
+      if nPosition>=0 then
+      	:oWorksheet>>getCellByPosition(1, nPosition-1)>>Rows>>removeByIndex(0, nNbRows)
+      end
+     type : 458752
+   -
+     name : ColumnHide
+     procedure_id : 1199007199537569669
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //ColumnHide (<sColumn> is string [, <bVisible>])
+      // Hides/Displays a column
+      // Parameters:
+      //	sColumn (ANSI string): Index of the column to hide
+      //	bVisible (default value=0): Column visibility (True or False)
+      // Return value:
+      // 	None
+      
+      procedure ColumnHide(sColumn is string, bVisible = False)
+      
+      nColumn is int = sColumn
+      
+      if nColumn>=0 then
+      	:oWorksheet>>getCellByPosition(nColumn-1, 1)>>Columns>>IsVisible = bVisible
+      end
+     type : 458752
+   -
+     name : RowHide
+     procedure_id : 1199007199537635205
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //RowHide (<sRow> is string [, <bVisible> is boolean])
+      // Hides/Displays a row
+      // Parameters:
+      //	sRow (ANSI string): Index of the row to hide
+      //	bVisible (boolean - default value=0): Row visibility (True or False)
+      // Return value:
+      // 	None
+      
+      procedure RowHide(sRow is string, bVisible is boolean = False)
+      
+      nRow is int = sRow
+      
+      if nRow >= 0 then
+      	:oWorksheet>>getCellByPosition(1, nRow-1)>>Rows>>IsVisible = bVisible
+      end
+     type : 458752
+   -
+     name : ActiveLibreOfficeObject
+     internal_properties : CAAAAAgAAABYapxWc6SFnghDfCZSlL5zkgjXAInj4QIToD5Nwd1oZLqds3YIhzeB2c0PdjfezAbDnIL5nb4BBbRAs8QzEMhSMUHHYQ4j2Ed/vifLF+qWGJjI96mC4dMzri8wAXJdTtg3OzOXrRYfF7SLTEQBH5NDvV5jAN8YNhxy+1AREltkuD6XrkiWWVT+IPE9wVXyAUWFyQjFfQ==
+     procedure_id : 1199007199537700741
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] ActiveLibreOfficeObject ()
+      // Gets the active instance of LibreOffice
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean:  True if an active instance was found
+      
+      procedure ActiveLibreOfficeObject()
+      
+      // Service manager needed for LibreOffice
+      :StartService()
+      
+      when exception in
+      	// Active object
+      	:oDocument = :oDesktop>>getCurrentComponent()
+      	
+      	// Active worksheet
+      	:oWorksheet = :oDocument>>CurrentController>>ActiveSheet
+      	
+      	// Selected cells
+      	:oCellRange = :oDocument>>CurrentSelection
+      	
+      	return True
+      	
+      do
+      	// No workbook object was found
+      	return False
+      end
+     type : 458752
+   -
+     name : IsOpen
+     procedure_id : 1199007199537766277
+     type_code : 12
+     code : |1+
+      // Syntax:
+      //[ <Result> = ] IsOpened ()
+      // Used to check whether the workbook is still opened
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean: True if the workbook is opened
+      
+      procedure virtual IsOpen()
+      
+      when exception in
+      	// attempt to access the active worksheet of the workbook
+      	if :oDocument <> Null then
+      		:oDocument>>CurrentController>>ActiveSheet
+      		return True
+      	else	
+      		return False
+      	end
+      do
+      	delete :oDocument
+      	delete :oCellRange
+      	delete :oWorksheet
+      	return False
+      end
+     type : 458752
+   -
+     name : WorksheetSelectIndex
+     procedure_id : 1199007199537831813
+     type_code : 12
+     code : |1+
+      // Syntax:
+      //[ <Result> = ] WorksheetSelectIndex (<sIndex> is string)
+      // Select a worksheet by its index
+      // Parameters:
+      //	sIndex (ANSI string): Index of the worksheet to select
+      // Return value:
+      // 	boolean: 
+      
+      procedure WorksheetSelectIndex(sIndex is string)
+      
+      nWorksheetIndex is int
+      
+      // Correction on the maximum index
+      nWorksheetIndex	= Min(Val(sIndex), :WorksheetOccurrence())
+      
+      // Correction on the minimum index
+      nWorksheetIndex	= Max(nWorksheetIndex, 1)
+      
+      // Select the specified worksheet
+      :oWorksheet = :oDocument>>Sheets>>getByIndex(nWorksheetIndex-1)
+      
+      // Display
+      :oDocument>>CurrentController>>ActiveSheet = :oWorksheet
+      
+      return True
+     type : 458752
+   -
+     name : WorksheetOccurrence
+     procedure_id : 1199007199537897349
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorksheetOccurrence ()
+      // Number of worksheets found in the workbook
+      // Parameters:
+      //	None
+      // Return value:
+      // 	Undefined type: Number of worksheets found in the workbook
+      
+      procedure WorksheetOccurrence()
+      
+      return :oDocument>>Sheets>>count()
+     type : 458752
+   -
+     name : WorksheetName
+     procedure_id : 1199007199537962885
+     type_code : 12
+     code : |1-
+      // Syntax:
+      //[ <Result> = ] WorksheetName ( [<nIndex>])
+      // Returns the name of the specified worksheet
+      // Parameters:
+      //	nIndex (default value=0): Index of the worksheet to query OR empty to get the name of the active worksheet
+      // Return value:
+      // 	ANSI string: Name of the specified string
+      
+      procedure WorksheetName(nIndex = 0)
+      
+      sWorksheeetName	is string
+      nWorksheetIndex	is  int
+      
+      // Correction on the maximum index
+      nWorksheetIndex	= Max(Val(nIndex), :WorksheetOccurrence())
+      
+      // Correction on the minimum index
+      nWorksheetIndex	= Max(Val(nIndex), 1)
+      
+      if nIndex =0 then
+      	// Name of current worksheet
+      	sWorksheeetName = :oDocument>>CurrentController>>ActiveSheet>>Name
+      else
+      	// Name of the specified worksheet
+      	sWorksheeetName = :oDocument>>Sheets>>getByIndex(nWorksheetIndex-1)>>Name
+      end
+      
+      return sWorksheeetName
+     type : 458752
+   -
+     name : SaveAs
+     internal_properties : CAAAAAgAAABb8AcbVdbUpxNoFD6cUE56fensi4GA5HtJk67pPcSr3yDJhkCQTGKaY/+N++V01EPtSVWdJFB7k/TgTwZhcNn8y9Bpo6t2sOlNU2ukakimScO4rDYmm6UP/GtFkO1Hy5Y4C0m4hCTUK2xFlf/q1ZorUIrtmW62h0D6YVvuYT8FqRCKrWAArO9udZilfNfdfhIuWayqCADuQEBZnDnYXmr782dTm40RIsC2YGonFf7U9j4BNgE=
+     procedure_id : 1199007199538028421
+     type_code : 12
+     code : |1+
+      // Syntax:
+      //SaveAs ([<psFullPath>])
+      // Save a document
+      // Parameters:
+      //	psFullPath: Full path of the file to save or empty string to open the file picker
+      // Return value:
+      // 	None
+      
+      procedure SaveAs(psFullPath="")
+      
+      // Is there an active document
+      if :IsOpen()=False then
+      	Error("No LibreOffice Calc document is open.","Unable to save.")
+      	return
+      end
+      
+      arrNoArgs		is array dynamic of variant
+      sWorkbookName	is string
+      
+      if psFullPath<>"" then
+      	sWorkbookName = psFullPath
+      else
+      	sWorkbookName = fSelect(fCurrentDir, "", "Save as...", "ODF Spreadsheet (*.ods)"+TAB+"*.ods" + rc +"Excel 2007-365 (*.xlsx)" + tab + "*.xlsx" , "*.ods", fselCreate)
+      	if sWorkbookName="" return
+      end
+      
+      // Format the path of the file
+      sWorkbookName = "file:///"+Replace(sWorkbookName,"\","/")
+      
+      // Save the document
+      :oDocument>>storeAsURL(sWorkbookName, arrNoArgs)
+      
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : CClasseur
+resources :
+ string_res :
+  identifier : 0x1fd224f9007135a1
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ
